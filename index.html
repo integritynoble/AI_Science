@@ -24,6 +24,7 @@
             <a href="#targeting-generation">Paper Generation</a>
             <a href="#maturity">Maturity Levels</a>
             <a href="https://cias.comparegpt.io/" target="_blank" class="nav-cta">Launch CIAS &rarr;</a>
+            <span id="auth-nav"></span>
         </div>
         <button class="mobile-toggle" aria-label="Toggle menu">&#9776;</button>
     </div>
@@ -644,6 +645,23 @@ window.addEventListener('scroll', function() {
         navbar.classList.remove('scrolled');
     }
 });
+
+// Auth-aware navbar
+(async function() {
+    const el = document.getElementById('auth-nav');
+    try {
+        const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
+        if (r.ok) {
+            const u = await r.json();
+            el.innerHTML = '<span class="nav-user">' + (u.user_name || u.user_id) +
+                '</span> <a href="/api/auth/logout" class="nav-auth-btn nav-logout">Sign Out</a>';
+        } else {
+            el.innerHTML = '<a href="/login" class="nav-auth-btn">Sign In</a>';
+        }
+    } catch(e) {
+        el.innerHTML = '<a href="/login" class="nav-auth-btn">Sign In</a>';
+    }
+})();
 </script>
 
 </body>

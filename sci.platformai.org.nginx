@@ -1,0 +1,60 @@
+server {
+    server_name sci.platformai.org;
+
+    root /home/spiritai/science/targeting;
+    index index.html;
+
+    # Auth API routes -> FastAPI backend
+    location /api/ {
+        proxy_pass http://127.0.0.1:8502;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Login page -> FastAPI
+    location /login {
+        proxy_pass http://127.0.0.1:8502;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # SSO callback -> FastAPI
+    location /sso/callback {
+        proxy_pass http://127.0.0.1:8502;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Static files served by Nginx
+    location / {
+        try_files $uri $uri/ =404;
+        add_header Cache-Control "no-cache, must-revalidate";
+    }
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/sci.platformai.org/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/sci.platformai.org/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = sci.platformai.org) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    listen [::]:80;
+    server_name sci.platformai.org;
+    return 404; # managed by Certbot
+
+
+}
